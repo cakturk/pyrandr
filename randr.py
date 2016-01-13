@@ -80,7 +80,7 @@ def parse_xrandr(lines):
                 screens.append(newscreen)
                 modes = []
 
-            sc_name = i
+            sc_name_line = i
 
         else:
             r = re.search(rx, i)
