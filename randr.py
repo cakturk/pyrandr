@@ -24,15 +24,22 @@ class Mode(object):
     __repr__ = __str__
 
 class Screen(object):
-    def __init__(self, name, modes):
+    def __init__(self, name, primary, modes):
         super(Screen, self).__init__()
 
         self.name = name
+        self.primary = primary
         # list of Modes (width, height)
         self.supported_modes = modes
 
     def is_connected(self):
         return len(self.supported_modes) != 0
+
+    def __str__(self):
+        return '{0}, primary: {1}, modes: {2}, conn: {3}'.format(self.name, \
+                self.primary, len(self.supported_modes), self.is_connected())
+
+    __repr__ = __str__
 
 
 def exec_cmd(cmd):
@@ -45,6 +52,7 @@ def parse_xrandr(lines):
     rxconn = re.compile(r'\bconnected\b')
     rxdisconn = re.compile(r'\bdisconnected\b')
 
+    sc_name_line = None
     sc_name = None
     width = None
     height = None
@@ -57,20 +65,22 @@ def parse_xrandr(lines):
 
     for i in lines:
         if re.search(rxconn, i):
-            if sc_name:
-                newscreen= Screen(sc_name, modes)
+            if sc_name_line:
+                sc_name = sc_name_line.split(' ')[0]
+                newscreen = Screen(sc_name, 'primary' in sc_name_line, modes)
                 screens.append(newscreen)
                 modes = []
 
-            sc_name = i.split(' ')[0]
+            sc_name_line = i
 
         elif re.search(rxdisconn, i):
-            if sc_name:
-                newscreen= Screen(sc_name, modes)
+            if sc_name_line:
+                sc_name = sc_name_line.split(' ')[0]
+                newscreen = Screen(sc_name, 'primary' in sc_name_line, modes)
                 screens.append(newscreen)
                 modes = []
 
-            sc_name = i.split(' ')[0]
+            sc_name = i
 
         else:
             r = re.search(rx, i)
@@ -85,7 +95,7 @@ def parse_xrandr(lines):
                 modes.append(newmode)
 
     if sc_name:
-        screens.append(Screen(sc_name, modes))
+        screens.append(Screen(sc_name, 'primary' in sc_name_line, modes))
 
     return screens
 
@@ -93,7 +103,7 @@ def main():
     print("main entry point\n================")
     s = parse_xrandr(exec_cmd('xrandr'))
     for i in s:
-        print i.name, len(i.supported_modes), i.is_connected()
+        print i
         for j in i.supported_modes:
             print j
         print '-------------------------'
