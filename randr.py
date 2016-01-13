@@ -101,15 +101,7 @@ def parse_xrandr(lines):
     modes = []
 
     for i in lines:
-        if re.search(rxconn, i):
-            if sc_name_line:
-                newscreen = create_screen(sc_name_line, modes)
-                screens.append(newscreen)
-                modes = []
-
-            sc_name_line = i
-
-        elif re.search(rxdisconn, i):
+        if re.search(rxconn, i) or re.search(rxdisconn, i):
             if sc_name_line:
                 newscreen = create_screen(sc_name_line, modes)
                 screens.append(newscreen)
