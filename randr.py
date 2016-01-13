@@ -12,23 +12,27 @@ class Mode(object):
         self.height = height
         self.freq = freq
         self.current = current
-        self.prefferred = preferred
+        self.preferred = preferred
 
     def __str__(self):
+        return '{0}x{1}, {2}, curr: {3}, pref: {4}'.format(self.width, \
+                self.height, self.freq, self.current, self.preferred)
+
+    def cmd_str(self, arg1):
         return '{0}x{1}'.format(self.width, self.height)
 
     __repr__ = __str__
 
 class Screen(object):
-    def __init__(self):
+    def __init__(self, name, modes):
         super(Screen, self).__init__()
 
-        self.name = None
+        self.name = name
         # list of Modes (width, height)
-        self.supported_modes = []
+        self.supported_modes = modes
 
     def is_connected(self):
-        return len(supported_modes) != 0
+        return len(self.supported_modes) != 0
 
 
 def exec_cmd(cmd):
@@ -47,13 +51,27 @@ def parse_xrandr(lines):
     freq = None
     current = False
     preferred = False
+
+    screens = []
     modes = []
 
     for i in lines:
         if re.search(rxconn, i):
+            if sc_name:
+                newscreen= Screen(sc_name, modes)
+                screens.append(newscreen)
+                modes = []
+
             sc_name = i.split(' ')[0]
+
         elif re.search(rxdisconn, i):
+            if sc_name:
+                newscreen= Screen(sc_name, modes)
+                screens.append(newscreen)
+                modes = []
+
             sc_name = i.split(' ')[0]
+
         else:
             r = re.search(rx, i)
             if r:
@@ -61,14 +79,24 @@ def parse_xrandr(lines):
                 height = r.group(2)
                 freq = r.group(3)
                 current = r.group(4).replace(' ', '') == '*'
-                #prefferred = r.group(5).replace(' ', '') == '+'
                 preferred = r.group(5).replace(' ', '') == '+'
-                print width, height, freq, current, preferred
-                #print preferred
+
+                newmode = Mode(width, height, freq, current, preferred)
+                modes.append(newmode)
+
+    if sc_name:
+        screens.append(Screen(sc_name, modes))
+
+    return screens
 
 def main():
     print("main entry point\n================")
-    parse_xrandr(exec_cmd('xrandr'))
+    s = parse_xrandr(exec_cmd('xrandr'))
+    for i in s:
+        print i.name, len(i.supported_modes), i.is_connected()
+        for j in i.supported_modes:
+            print j
+        print '-------------------------'
 
 if __name__ == '__main__':
     main()
