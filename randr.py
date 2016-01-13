@@ -24,11 +24,18 @@ class Mode(object):
     __repr__ = __str__
 
 class Screen(object):
-    def __init__(self, name, primary, modes):
+    def __init__(self, name, primary, rot, modes):
         super(Screen, self).__init__()
 
         self.name = name
         self.primary = primary
+
+        # dirty hack
+        self.rotation = None
+        for r in modes:
+            if r.current:
+                self.rotation = rot
+
         # list of Modes (width, height)
         self.supported_modes = modes
 
@@ -36,16 +43,46 @@ class Screen(object):
         return len(self.supported_modes) != 0
 
     def __str__(self):
-        return '{0}, primary: {1}, modes: {2}, conn: {3}'.format(self.name, \
-                self.primary, len(self.supported_modes), self.is_connected())
+        return '{0}, primary: {1}, modes: {2}, conn: {3}, rot: {4}'.format( \
+                self.name, self.primary, len(self.supported_modes), \
+                self.is_connected(), rot_to_str(self.rotation))
 
     __repr__ = __str__
+
+class RotateDirection(object):
+    Normal, Left, Inverted, Right = tuple(range(4))
+    valtoname = {Normal:'normal', Left:'left', Inverted:'inverted', \
+            Right:'right'}
+    nametoval = {'normal':Normal, 'left':Left, 'inverted':Inverted, \
+            'right':Right}
+
+def rot_to_str(rot):
+    if rot in RotateDirection.valtoname:
+        return RotateDirection.valtoname[rot]
+    return None
+
+def str_to_rot(s):
+    if s in RotateDirection.nametoval:
+        return RotateDirection.nametoval[s]
+    return None
 
 
 def exec_cmd(cmd):
     # throws exception CalledProcessError
     s = sb.check_output(cmd, stderr=sb.STDOUT)
     return s.split('\n')
+
+def create_screen(name_str, modes):
+    rot = None
+    sc_name = name_str.split(' ')[0]
+
+    # if connected
+    if modes:
+        fr = name_str.split(' ')
+        if len(fr) > 2:
+            rot = str_to_rot(name_str.split(' ')[3])
+
+    return Screen(sc_name, 'primary' in name_str, rot, modes)
 
 def parse_xrandr(lines):
     rx = re.compile('^\s+(\d+)x(\d+)\s+((?:\d+\.)?\d+)([* ]?)([+ ]?)')
@@ -66,8 +103,7 @@ def parse_xrandr(lines):
     for i in lines:
         if re.search(rxconn, i):
             if sc_name_line:
-                sc_name = sc_name_line.split(' ')[0]
-                newscreen = Screen(sc_name, 'primary' in sc_name_line, modes)
+                newscreen = create_screen(sc_name_line, modes)
                 screens.append(newscreen)
                 modes = []
 
@@ -75,8 +111,7 @@ def parse_xrandr(lines):
 
         elif re.search(rxdisconn, i):
             if sc_name_line:
-                sc_name = sc_name_line.split(' ')[0]
-                newscreen = Screen(sc_name, 'primary' in sc_name_line, modes)
+                newscreen = create_screen(sc_name_line, modes)
                 screens.append(newscreen)
                 modes = []
 
@@ -95,7 +130,7 @@ def parse_xrandr(lines):
                 modes.append(newmode)
 
     if sc_name:
-        screens.append(Screen(sc_name, 'primary' in sc_name_line, modes))
+        screens.append(Screen(sc_name, 'primary' in sc_name_line, None, modes))
 
     return screens
 
