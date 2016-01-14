@@ -64,7 +64,7 @@ def rot_to_str(rot):
 def str_to_rot(s):
     if s in RotateDirection.nametoval:
         return RotateDirection.nametoval[s]
-    return None
+    return RotateDirection.Normal
 
 
 def exec_cmd(cmd):
