@@ -121,8 +121,8 @@ def parse_xrandr(lines):
                 newmode = Mode(width, height, freq, current, preferred)
                 modes.append(newmode)
 
-    if sc_name:
-        screens.append(Screen(sc_name, 'primary' in sc_name_line, None, modes))
+    if sc_name_line:
+        screens.append(create_screen(sc_name_line, modes))
 
     return screens
 
