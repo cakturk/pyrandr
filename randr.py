@@ -112,9 +112,9 @@ def parse_xrandr(lines):
         else:
             r = re.search(rx, i)
             if r:
-                width = r.group(1)
-                height = r.group(2)
-                freq = r.group(3)
+                width = int(r.group(1))
+                height = int(r.group(2))
+                freq = float(r.group(3))
                 current = r.group(4).replace(' ', '') == '*'
                 preferred = r.group(5).replace(' ', '') == '+'
 
