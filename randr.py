@@ -50,7 +50,7 @@ class Screen(object):
     __repr__ = __str__
 
 class RotateDirection(object):
-    Normal, Left, Inverted, Right = tuple(range(4))
+    Normal, Left, Inverted, Right = range(1, 5)
     valtoname = {Normal:'normal', Left:'left', Inverted:'inverted', \
             Right:'right'}
     nametoval = {'normal':Normal, 'left':Left, 'inverted':Inverted, \
