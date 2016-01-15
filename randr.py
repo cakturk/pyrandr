@@ -13,7 +13,7 @@ class Mode(object):
         self.current = current
         self.preferred = preferred
 
-    def get_resolution(self):
+    def resolution(self):
         return (self.width, self.height)
 
     def __str__(self):
@@ -69,11 +69,11 @@ class Screen(object):
                 return True
         return False
 
-    def get_available_resolutions(self):
+    def available_resolutions(self):
         return [(r.width, r.height) for r in self.supported_modes]
 
     def check_resolution(self, newres):
-        if newres not in self.get_available_resolutions():
+        if newres not in self.available_resolutions():
             raise ValueError('Requested resolution is not supported', newres)
 
     def set_resolution(self, newres):
@@ -122,7 +122,7 @@ class Screen(object):
         """
         self.set.position = (relation, relative_to)
 
-    def apply_settings(self):
+    def build_cmd(self):
         if not self.name:
             raise ValueError('Cannot apply settings without screen name', \
                              self.name)
@@ -134,7 +134,7 @@ class Screen(object):
         cmd = ['xrandr', '--output', self.name]
 
         # set resolution
-        if self.curr_mode.get_resolution() == self.set.resolution \
+        if self.curr_mode.resolution() == self.set.resolution \
                 or not self.set.resolution:
             cmd.append('--auto')
         else:
@@ -167,6 +167,12 @@ class Screen(object):
                                 'with other options')
             cmd.append('--off')
             has_changed = True
+
+        return cmd
+
+    def apply_settings(self):
+        exec_cmd(self.build_cmd())
+        self.set.reset()
 
     def __str__(self):
         return '{0}, primary: {1}, modes: {2}, conn: {3}, rot: {4}, '\
@@ -264,13 +270,13 @@ def parse_xrandr(lines):
 
     return screens
 
-def get_connected_screens():
+def connected_screens():
     """Get connected screens
     """
     return [s for s in parse_xrandr(exec_cmd('xrandr')) if s.is_connected()]
 
-def get_enabled_screens():
-    return [s for s in get_connected_screens() if s.is_enabled()]
+def enabled_screens():
+    return [s for s in connected_screens() if s.is_enabled()]
 
 def main():
     print("main entry point\n================")
