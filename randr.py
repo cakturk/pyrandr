@@ -277,15 +277,3 @@ def connected_screens():
 
 def enabled_screens():
     return [s for s in connected_screens() if s.is_enabled()]
-
-def main():
-    print("main entry point\n================")
-    s = parse_xrandr(exec_cmd('xrandr'))
-    for i in s:
-        print i
-        for j in i.supported_modes:
-            print j
-        print '-------------------------'
-
-if __name__ == '__main__':
-    main()
