@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import subprocess as sb
-import re
 
 class Mode(object):
     """docstring for Mode"""
@@ -223,6 +222,7 @@ def create_screen(name_str, modes):
     return Screen(sc_name, 'primary' in name_str, rot, modes)
 
 def parse_xrandr(lines):
+    import re
     rx = re.compile('^\s+(\d+)x(\d+)\s+((?:\d+\.)?\d+)([* ]?)([+ ]?)')
     rxconn = re.compile(r'\bconnected\b')
     rxdisconn = re.compile(r'\bdisconnected\b')
