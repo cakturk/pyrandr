@@ -8,24 +8,32 @@ import argparse
 
 def setup_arg_parser():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--output')
+    ap.add_argument('--output', help='Selects an output to reconfigure.')
 
     gr = ap.add_mutually_exclusive_group()
-    gr.add_argument('--mode')
-    gr.add_argument('--auto', action='store_true')
-    ap.add_argument('--off', action='store_true')
-    ap.add_argument('--dry-run', action='store_true')
+    gr.add_argument('--mode', help='Sets a resolution for the selected output')
+    gr.add_argument('--auto', action='store_true',
+            help='Selects default resolution for the output.')
+    ap.add_argument('--off', action='store_true',
+            help='Disables the output')
+    ap.add_argument('--dry-run', action='store_true',
+            help='Prints the generated cmdline')
 
-    ap.add_argument('--primary', action='store_true')
+    ap.add_argument('--primary', action='store_true',
+            help='Set the output as primary')
     ap.add_argument('--rotate', choices=[ 'normal', 'left',
-        'right', 'inverted'])
+        'right', 'inverted'],
+        help='Rotate the output content in the specified direction')
 
-    gr = ap.add_mutually_exclusive_group()
-    gr.add_argument('--left-of')
-    gr.add_argument('--right-of')
-    gr.add_argument('--above')
-    gr.add_argument('--below')
-    gr.add_argument('--same-as')
+    rot_gr = ap.add_argument_group('Position the output',
+            'Use  one  of  these  options  to  position ' \
+            'the output relative to the position of another output.')
+    gr = rot_gr.add_mutually_exclusive_group()
+    gr.add_argument('--left-of', metavar='OUTPUT')
+    gr.add_argument('--right-of', metavar='OUTPUT')
+    gr.add_argument('--above', metavar='OUTPUT')
+    gr.add_argument('--below', metavar='OUTPUT')
+    gr.add_argument('--same-as', metavar='OUTPUT')
 
     return ap
 
