@@ -148,7 +148,8 @@ class Screen(object):
         cmd = ['xrandr', '--output', self.name]
 
         # set resolution
-        if self.curr_mode.resolution() == self.set.resolution \
+        if self.is_enabled() \
+                and self.curr_mode.resolution() == self.set.resolution \
                 or not self.set.resolution:
             cmd.append('--auto')
         else:
