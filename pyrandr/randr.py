@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import subprocess as sb
+from six import iteritems
 
 
 class Mode(object):
@@ -144,7 +146,8 @@ class Screen(object):
 
     def build_cmd(self):
         if not self.name:
-            raise ValueError('Cannot apply settings without screen name', self.name)
+            raise ValueError('Cannot apply settings without screen name',
+                             self.name)
         if self.set.resolution:
             self.check_resolution(self.set.resolution)
 
@@ -153,8 +156,8 @@ class Screen(object):
         cmd = ['xrandr', '--output', self.name]
 
         # set resolution
-        if self.is_enabled() \
-                and self.curr_mode.resolution() == self.set.resolution \
+        if self.is_enabled() and \
+                self.curr_mode.resolution() == self.set.resolution \
                 or not self.set.resolution:
             cmd.append('--auto')
         else:
@@ -170,7 +173,8 @@ class Screen(object):
         if self.set.rotation and self.set.rotation is not self.rotation:
             rot = rot_to_str(self.set.rotation)
             if not rot:
-                raise ValueError('Invalid rotation value', rot, self.set.rotation)
+                raise ValueError('Invalid rotation value',
+                                 rot, self.set.rotation)
             cmd.extend(['--rotate', rot])
             has_changed = True
 
@@ -206,14 +210,16 @@ class Screen(object):
 
 class RotateDirection(object):
     Normal, Left, Inverted, Right = range(1, 5)
-    valtoname = {Normal: 'normal', Left: 'left', Inverted: 'inverted', Right: 'right'}
-    nametoval = dict((v, k) for k, v in valtoname.items())
+    valtoname = {Normal: 'normal', Left: 'left',
+                 Inverted: 'inverted', Right: 'right'}
+    nametoval = dict((v, k) for k, v in iteritems(valtoname))
 
 
 def rot_to_str(rot):
     if rot in RotateDirection.valtoname:
         return RotateDirection.valtoname[rot]
     return None
+
 
 def str_to_rot(s):
     if s in RotateDirection.nametoval:
@@ -225,7 +231,7 @@ class PostitonType(object):
     LeftOf, RightOf, Above, Below, SameAs = range(1, 6)
     valtoname = {LeftOf: '--left-of', RightOf: '--right-of',
                  Above: '--above', Below: '--below', SameAs: '--same-as'}
-    nametoval = dict((v, k) for k, v in valtoname.items())
+    nametoval = dict((v, k) for k, v in iteritems(valtoname))
 
 
 def pos_to_str(n):
@@ -243,7 +249,6 @@ def exec_cmd(cmd):
         s = s.decode()
     except AttributeError:
         pass
-    t = type(s)
 
     return s.split('\n')
 
