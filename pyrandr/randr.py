@@ -17,6 +17,7 @@
 
 import subprocess as sb
 
+
 class Mode(object):
     """docstring for Mode"""
     def __init__(self, width, height, freq, current, preferred):
@@ -28,16 +29,20 @@ class Mode(object):
         self.preferred = preferred
 
     def resolution(self):
-        return (self.width, self.height)
+        return self.width, self.height
 
     def __str__(self):
-        return '{0}x{1}, {2}, curr: {3}, pref: {4}'.format(self.width, \
-                self.height, self.freq, self.current, self.preferred)
+        return '{0}x{1}, {2}, curr: {3}, pref: {4}'.format(self.width,
+                                                           self.height,
+                                                           self.freq,
+                                                           self.current,
+                                                           self.preferred)
 
-    def cmd_str(self, arg1):
+    def cmd_str(self):
         return '{0}x{1}'.format(self.width, self.height)
 
     __repr__ = __str__
+
 
 class ScreenSettings(object):
     """docstring for ScreenSettings"""
@@ -52,6 +57,7 @@ class ScreenSettings(object):
         self.rotation = None
         self.position = None
         self.dirty = False
+
 
 class Screen(object):
     def __init__(self, name, primary, rot, modes):
@@ -103,7 +109,7 @@ class Screen(object):
         self.check_resolution(newres)
         self.set.resolution = newres
 
-    def set_as_primary(self,  is_primary):
+    def set_as_primary(self, is_primary):
         """Set this monitor as primary
 
         :is_primary: bool
@@ -138,8 +144,7 @@ class Screen(object):
 
     def build_cmd(self):
         if not self.name:
-            raise ValueError('Cannot apply settings without screen name', \
-                             self.name)
+            raise ValueError('Cannot apply settings without screen name', self.name)
         if self.set.resolution:
             self.check_resolution(self.set.resolution)
 
@@ -165,8 +170,7 @@ class Screen(object):
         if self.set.rotation and self.set.rotation is not self.rotation:
             rot = rot_to_str(self.set.rotation)
             if not rot:
-                raise ValueError('Invalid rotation value', \
-                                 rot, self.set.rotation)
+                raise ValueError('Invalid rotation value', rot, self.set.rotation)
             cmd.extend(['--rotate', rot])
             has_changed = True
 
@@ -178,8 +182,7 @@ class Screen(object):
 
         if self.is_enabled() and not self.set.is_enabled:
             if has_changed:
-                raise Exception('--off: this option cannot be combined ' \
-                                'with other options')
+                raise Exception('--off: this option cannot be combined with other options')
             cmd.append('--off')
             has_changed = True
 
@@ -191,17 +194,21 @@ class Screen(object):
 
     def __str__(self):
         return '{0}, primary: {1}, modes: {2}, conn: {3}, rot: {4}, '\
-                'enabled: {5}'.format(self.name, self.primary, \
-                len(self.supported_modes), self.is_connected(), \
-                rot_to_str(self.rotation), self.is_enabled())
+                'enabled: {5}'.format(self.name,
+                                      self.primary,
+                                      len(self.supported_modes),
+                                      self.is_connected(),
+                                      rot_to_str(self.rotation),
+                                      self.is_enabled())
 
     __repr__ = __str__
 
+
 class RotateDirection(object):
     Normal, Left, Inverted, Right = range(1, 5)
-    valtoname = {Normal:'normal', Left:'left', Inverted:'inverted', \
-            Right:'right'}
-    nametoval = dict((v, k) for k, v in valtoname.iteritems())
+    valtoname = {Normal: 'normal', Left: 'left', Inverted: 'inverted', Right: 'right'}
+    nametoval = dict((v, k) for k, v in valtoname.items())
+
 
 def rot_to_str(rot):
     if rot in RotateDirection.valtoname:
@@ -213,22 +220,33 @@ def str_to_rot(s):
         return RotateDirection.nametoval[s]
     return RotateDirection.Normal
 
+
 class PostitonType(object):
     LeftOf, RightOf, Above, Below, SameAs = range(1, 6)
-    valtoname = {LeftOf:'--left-of', RightOf:'--right-of', Above:'--above', \
-                 Below:'--below', SameAs:'--same-as'}
-    nametoval = dict((v, k) for k, v in valtoname.iteritems())
+    valtoname = {LeftOf: '--left-of', RightOf: '--right-of',
+                 Above: '--above', Below: '--below', SameAs: '--same-as'}
+    nametoval = dict((v, k) for k, v in valtoname.items())
+
 
 def pos_to_str(n):
     return PostitonType.valtoname[n]
 
+
 def str_to_pos(s):
     return PostitonType.nametoval[s]
+
 
 def exec_cmd(cmd):
     # throws exception CalledProcessError
     s = sb.check_output(cmd, stderr=sb.STDOUT)
+    try:
+        s = s.decode()
+    except AttributeError:
+        pass
+    t = type(s)
+
     return s.split('\n')
+
 
 def create_screen(name_str, modes):
     rot = None
@@ -242,9 +260,10 @@ def create_screen(name_str, modes):
 
     return Screen(sc_name, 'primary' in name_str, rot, modes)
 
+
 def parse_xrandr(lines):
     import re
-    rx = re.compile('^\s+(\d+)x(\d+)\s+((?:\d+\.)?\d+)([* ]?)([+ ]?)')
+    rx = re.compile(r'^\s+(\d+)x(\d+)\s+((?:\d+\.)?\d+)([* ]?)([+ ]?)')
     rxconn = re.compile(r'\bconnected\b')
     rxdisconn = re.compile(r'\bdisconnected\b')
 
@@ -285,10 +304,12 @@ def parse_xrandr(lines):
 
     return screens
 
+
 def connected_screens():
     """Get connected screens
     """
     return [s for s in parse_xrandr(exec_cmd('xrandr')) if s.is_connected()]
+
 
 def enabled_screens():
     return [s for s in connected_screens() if s.is_enabled()]

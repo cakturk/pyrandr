@@ -63,7 +63,7 @@ def find_output_or_die(outputname, screens):
 
 def execute(screen, dry_run=False):
     if dry_run:
-        print screen.build_cmd()
+        print(screen.build_cmd())
     else:
         screen.apply_settings()
     sys.exit(0)
@@ -74,9 +74,9 @@ def main():
     args = ap.parse_args()
     if len(sys.argv) == 1:
         for s in cs:
-            print s
+            print(s)
             for m in s.supported_modes:
-                print m
+                print(m)
         sys.exit(0)
 
     if not args.output:
