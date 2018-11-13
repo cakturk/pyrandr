@@ -61,3 +61,8 @@ cs.rotate(RotateDirection.Right)
 cs.apply_settings()
 
 ```
+
+Credits
+-------
+
+[Davydov Denis](https://github.com/dadmoscow)
