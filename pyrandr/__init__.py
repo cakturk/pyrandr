@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from randr import connected_screens, enabled_screens
-from randr import RotateDirection, PostitonType
-from randr import str_to_rot, str_to_pos
-from randr import rot_to_str, pos_to_str
+from pyrandr.randr import connected_screens, enabled_screens
+from pyrandr.randr import RotateDirection, PostitonType
+from pyrandr.randr import str_to_rot, str_to_pos
+from pyrandr.randr import rot_to_str, pos_to_str

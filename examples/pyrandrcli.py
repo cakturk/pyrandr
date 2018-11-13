@@ -15,10 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import pyrandr as randr
 import argparse
+
 
 def setup_arg_parser():
     ap = argparse.ArgumentParser()
@@ -27,21 +29,21 @@ def setup_arg_parser():
     gr = ap.add_mutually_exclusive_group()
     gr.add_argument('--mode', help='Sets a resolution for the selected output')
     gr.add_argument('--auto', action='store_true',
-            help='Selects default resolution for the output.')
+                    help='Selects default resolution for the output.')
     ap.add_argument('--off', action='store_true',
-            help='Disables the output')
+                    help='Disables the output')
     ap.add_argument('--dry-run', action='store_true',
-            help='Prints the generated cmdline')
+                    help='Prints the generated cmdline')
 
     ap.add_argument('--primary', action='store_true',
-            help='Set the output as primary')
-    ap.add_argument('--rotate', choices=[ 'normal', 'left',
-        'right', 'inverted'],
-        help='Rotate the output content in the specified direction')
+                    help='Set the output as primary')
+    ap.add_argument('--rotate', choices=['normal', 'left',
+                                         'right', 'inverted'],
+                    help='Rotate the output content in the specified direction')
 
-    rot_gr = ap.add_argument_group('Position the output',
-            'Use  one  of  these  options  to  position ' \
-            'the output relative to the position of another output.')
+    rot_gr = ap.add_argument_group('Position the output', """Use  one  of  these  options  to  position 
+    the output relative to the position of another output.""")
+
     gr = rot_gr.add_mutually_exclusive_group()
     gr.add_argument('--left-of', metavar='OUTPUT')
     gr.add_argument('--right-of', metavar='OUTPUT')
@@ -51,9 +53,11 @@ def setup_arg_parser():
 
     return ap
 
+
 def die(msg):
     sys.stderr.write(msg)
     sys.exit(127)
+
 
 def find_output_or_die(outputname, screens):
     for s in screens:
@@ -61,12 +65,14 @@ def find_output_or_die(outputname, screens):
             return s
     die('\ninvalid --output: {}\n'.format(outputname))
 
+
 def execute(screen, dry_run=False):
     if dry_run:
-        print screen.build_cmd()
+        print(screen.build_cmd())
     else:
         screen.apply_settings()
     sys.exit(0)
+
 
 def main():
     cs = randr.connected_screens()
@@ -74,9 +80,9 @@ def main():
     args = ap.parse_args()
     if len(sys.argv) == 1:
         for s in cs:
-            print s
+            print(s)
             for m in s.supported_modes:
-                print m
+                print(m)
         sys.exit(0)
 
     if not args.output:
@@ -118,6 +124,7 @@ def main():
     if relation:
         sc.set_position(randr.str_to_pos(relation), relative_to)
     execute(sc, args.dry_run)
+
 
 if __name__ == '__main__':
     main()
